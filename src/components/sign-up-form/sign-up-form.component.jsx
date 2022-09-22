@@ -6,6 +6,8 @@ import {
   createUserDocumentFromAuth,
 } from "../../utils/firebase/firebase.utils";
 
+import { updateProfile } from "firebase/auth";
+
 import FormInput from "../form-input/form-input.component";
 import Button from "../button/button.component";
 
@@ -50,22 +52,24 @@ const SignUpForm = () => {
       );
 
       await createUserDocumentFromAuth(user, { displayName });
+      await updateProfile(user, { displayName });
       resetFormFields();
     } catch (err) {
-      if (err.code === "auth/email-already-exists")
-        alert("The provided email is already in use by an existing user.");
-      if (err.code === "auth/weak-password")
-        alert("Password should be at least 6 characters");
-      console.log("There was an error", err);
+      switch (err.code) {
+        case "auth/email-already-in-use":
+          alert("The provided email is already in use by an existing user.");
+          break;
+        case "auth/weak-password":
+          alert("Password should be at least 6 characters");
+          break;
+        default:
+          console.log("There was an error", err);
+      }
     }
-
-    // const response = await createAuthUserWithEmailAndPassword(email, password);
-
-    // console.log(response);
   };
 
   return (
-    <div class="sign-up-container">
+    <div className="sign-up-container">
       <h2>Don't have an account?</h2>
       <span>Sign up with your email and password</span>
       <form
@@ -86,24 +90,24 @@ const SignUpForm = () => {
           type="email"
           required
           onChange={handleChange}
-          name="displayName"
-          value={displayName}
+          name="email"
+          value={email}
         />
         <FormInput
           label="Password"
           type="password"
           required
           onChange={handleChange}
-          name="displayName"
-          value={displayName}
+          name="password"
+          value={password}
         />
         <FormInput
           label="Confirm Password"
           type="password"
           required
           onChange={handleChange}
-          name="displayName"
-          value={displayName}
+          name="confirmPassword"
+          value={confirmPassword}
         />
         <Button type="submit">Sign up</Button>
       </form>
