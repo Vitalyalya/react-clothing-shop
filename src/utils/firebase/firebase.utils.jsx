@@ -2,7 +2,6 @@ import { initializeApp } from "firebase/app";
 import {
   getAuth,
   signOut,
-  signInWithRedirect,
   signInWithPopup,
   signInWithEmailAndPassword,
   GoogleAuthProvider,
@@ -10,7 +9,15 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  query,
+  getDocs,
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCdLZ5U_guUP4PqtaY7hd_fA25R9qGFW3k",
@@ -25,6 +32,20 @@ const firebaseConfig = {
 initializeApp(firebaseConfig);
 export const db = getFirestore();
 
+export const getCollectionAndDocuments = async () => {
+  const collectionRef = collection(db, "categories");
+
+  const q = query(collectionRef);
+  const querySnapshot = await getDocs(q);
+  const categoryMap = querySnapshot.docs.reduce((acc, docSnapshot) => {
+    const { title, items } = docSnapshot.data();
+    acc[title.toLowerCase()] = items;
+    return acc;
+  }, {});
+
+  return categoryMap;
+};
+
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({
   prompt: "select_account",
@@ -32,8 +53,6 @@ provider.setCustomParameters({
 
 export const auth = getAuth();
 export const signInWithGooglePopup = () => signInWithPopup(auth, provider);
-export const signInWithGoogleRedirect = () =>
-  signInWithRedirect(auth, provider);
 
 export const createUserDocumentFromAuth = async (userAuth, addInfo = {}) => {
   if (!userAuth) return;
@@ -62,7 +81,6 @@ export const createUserDocumentFromAuth = async (userAuth, addInfo = {}) => {
 };
 
 export const createAuthUserWithEmailAndPassword = async (email, password) => {
-  console.log(email, password);
   if (!email || !password) return;
 
   return await createUserWithEmailAndPassword(auth, email, password);
@@ -74,7 +92,10 @@ export const passSignInWithEmailAndPasswordData = async (email, password) => {
   return await signInWithEmailAndPassword(auth, email, password);
 };
 
-export const signOutUser = async () => signOut(auth);
+export const signOutUser = async () => {
+  signOut(auth);
+  localStorage.removeItem("user");
+};
 
 export const onAuthStateChangedListener = (callback) =>
   onAuthStateChanged(auth, callback);

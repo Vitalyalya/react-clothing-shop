@@ -1,4 +1,8 @@
-import "./cart-dropdown.styles.scss";
+import {
+  CartDropdownContainer,
+  EmptyMessage,
+  CartItems,
+} from "./cart-dropdown.styles.jsx";
 import Button from "../button/button.component";
 import CartItem from "../cart-item/cart-item.component";
 
@@ -20,15 +24,15 @@ const CartDropdown = () => {
   const toggleIsCartOpen = () => setIsCartOpen(!isCartOpen);
 
   return (
-    <div className="cart-dropdown-container">
+    <CartDropdownContainer>
       {cartItems.length ? (
-        <div className="cart-items">
+        <CartItems>
           {cartItems.map((item) => (
             <CartItem key={item.id} cartItem={item} />
           ))}
-        </div>
+        </CartItems>
       ) : (
-        <div className="empty-message">Your cart is empty</div>
+        <EmptyMessage>Your cart is empty</EmptyMessage>
       )}
       <Button
         onClick={() => {
@@ -38,7 +42,7 @@ const CartDropdown = () => {
       >
         GO TO CHECKOUT
       </Button>
-    </div>
+    </CartDropdownContainer>
   );
 };
 
